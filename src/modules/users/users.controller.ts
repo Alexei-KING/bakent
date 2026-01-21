@@ -26,6 +26,10 @@ export class UsersController {
   findAll() {
     return this.usersService.findAll();
   }
+  @Get('roles')
+  findAllRoles() {
+    return this.usersService.findAllRoles();
+  }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {

@@ -1,6 +1,5 @@
 import {
   IsArray,
-  IsEnum,
   IsPositive,
   IsInt,
   ValidateNested,
@@ -23,6 +22,8 @@ export class CreateSaleDto {
   @IsNumber()
   paymentMethodId: number;
 
+  @IsInt()
+  currencyId: number;
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SaleItemDto)

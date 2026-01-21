@@ -7,12 +7,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { Roles } from './entities/roles.entity';
 import { Repository, Not, IsNull } from 'typeorm';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Roles)
+    private readonly rolesRepository: Repository<Roles>,
   ) {}
 
   async updateRefreshToken(id: number, refreshTokenHash: string | null) {
@@ -70,7 +73,13 @@ export class UsersService {
       data: user,
     };
   }
-
+  async findAllRoles() {
+    const roles = await this.rolesRepository.find();
+    return {
+      message: 'Roles listados correctamente',
+      data: roles,
+    };
+  }
   async findByOne(id: number) {
     const user = await this.findOne(id);
     return {

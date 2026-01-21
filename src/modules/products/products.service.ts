@@ -90,14 +90,14 @@ export class ProductsService {
     // Antes decia: this.productRepository.delete(id)
     // Ahora dice:  this.productRepo.delete(id)
     // (Porque así lo llamaste en el constructor arriba)
-    
+
     // Primero verificamos si existe (opcional, pero recomendado)
-    await this.findOne(id); 
+    await this.findOne(id);
 
     const result = await this.productRepo.delete(id);
     return {
-        message: 'Producto eliminado correctamente',
-        data: result
+      message: 'Producto eliminado correctamente',
+      data: result,
     };
   }
 }

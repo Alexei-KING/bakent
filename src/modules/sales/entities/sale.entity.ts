@@ -11,6 +11,7 @@ import { User } from '../../users/entities/user.entity';
 import { SaleDetail } from './sale-detail.entity';
 import { Client } from 'src/modules/clients/entities/client.entity';
 import { PaymentMethod } from './payment-method.entity';
+import { Currency } from 'src/modules/currency/entities/currency.entity';
 
 @Entity('sales')
 export class Sale {
@@ -30,7 +31,18 @@ export class Sale {
 
   @ManyToOne(() => Client, (client) => client.sale)
   client: Client;
-
+  @ManyToOne(() => Currency, { eager: true })
+  @JoinColumn({ name: 'currencyId' })
+  currency: Currency;
+  @Column('decimal', {
+    precision: 14,
+    scale: 4,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
+  exchangeRateValue: number;
   @ManyToOne(() => User, (user) => user.sale)
   @JoinColumn({ name: 'userId' })
   user: User;

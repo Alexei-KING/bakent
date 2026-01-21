@@ -11,6 +11,8 @@ import { Client } from '../clients/entities/client.entity';
 import { Product } from '../products/entities/product.entity';
 import { SaleDetail } from './entities/sale-detail.entity';
 import { PaymentMethod } from './entities/payment-method.entity';
+import { ExchangeRate } from '../currency/entities/ExchangeRate.entity';
+
 import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class SalesService {
@@ -24,14 +26,28 @@ export class SalesService {
     createSaleDto: CreateSaleDto,
     user: { sub: number; cedula: string; role: string },
   ) {
-    console.log('Usuario:', user);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const { clientId, paymentMethodId, items } = createSaleDto;
+      const { clientId, paymentMethodId, currencyId, items } = createSaleDto;
       let totalSale = 0;
       const saleDetails: SaleDetail[] = [];
+
+      // validacion de la moneda
+      const latestRate = await queryRunner.manager.findOne(ExchangeRate, {
+        where: { currency: { id: currencyId } },
+        order: { createdAt: 'DESC' },
+        relations: ['currency'],
+      });
+
+      if (!latestRate && currencyId !== 1) {
+        // Asumiendo 1 como ID de BS
+        throw new NotFoundException(
+          'No se encontró una tasa de cambio vigente para esta moneda',
+        );
+      }
+      const currentRateValue = latestRate ? Number(latestRate.rateValue) : 1.0;
 
       // validacion del metodo de pago
       const paymentMethodEntity = await queryRunner.manager.findOne(
@@ -104,6 +120,8 @@ export class SalesService {
         client: { id: client.id },
         user: { id: user.sub },
         saleDetails: saleDetails,
+        currency: { id: currencyId },
+        exchangeRateValue: currentRateValue,
       });
 
       const savedSale = await queryRunner.manager.save(sale);
@@ -141,7 +159,15 @@ export class SalesService {
     };
   }
 
-  async findOne(id: number) {
+  async findOneBy(id: number) {
+    const OneSale = await this.findOne(id);
+    return {
+      message: 'Venta listada correctamente',
+      data: OneSale,
+    };
+  }
+
+  private async findOne(id: number) {
     const sale = await this.dataSource.getRepository(Sale).findOne({
       where: { id },
       relations: [
@@ -150,6 +176,8 @@ export class SalesService {
         'user',
         'saleDetails',
         'saleDetails.product',
+        'currency',
+        'paymentMethod',
       ],
     });
 
@@ -157,9 +185,6 @@ export class SalesService {
       throw new NotFoundException(`La venta no existe`);
     }
 
-    return {
-      message: 'Venta encontrada',
-      data: sale,
-    };
+    return sale;
   }
 }

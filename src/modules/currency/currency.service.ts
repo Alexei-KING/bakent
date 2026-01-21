@@ -1,0 +1,80 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ExchangeRate } from './entities/ExchangeRate.entity';
+import { CreateExchangeRateDto } from './dto/create-currency.dto';
+
+@Injectable()
+export class ExchangeRateService {
+  constructor(
+    @InjectRepository(ExchangeRate)
+    private readonly rateRepo: Repository<ExchangeRate>,
+  ) {}
+
+  async create(
+    createDto: CreateExchangeRateDto,
+    user: { sub: number; cedula: string; role: string },
+  ) {
+    try {
+      // Creamos la instancia vinculando al usuario por su 'sub' (ID)
+      const newRate = this.rateRepo.create({
+        rateValue: createDto.rateValue,
+        currency: { id: createDto.currencyId },
+        user: { id: user.sub },
+      });
+
+      const result = await this.rateRepo.save(newRate);
+
+      return {
+        message: 'Tasa de cambio registrada correctamente',
+        data: result,
+      };
+    } catch (error) {
+      return {
+        message: 'Error al registrar la tasa de cambio',
+        data: error.message,
+      };
+    }
+  }
+
+  async getLatestRate(currencyCode: string) {
+    const result = await this.rateRepo.findOne({
+      where: { currency: { code: currencyCode.toUpperCase() } },
+      order: { createdAt: 'DESC' },
+      relations: ['currency'],
+    });
+
+    if (!result) {
+      return {
+        message: `No se encontró tasa actual para la moneda: ${currencyCode}`,
+        data: null,
+      };
+    }
+
+    return {
+      message: 'Tasa de cambio actual obtenida correctamente',
+      data: result,
+    };
+  }
+
+  async getHistory(currencyId: number, limit: number = 30) {
+    try {
+      const result = await this.rateRepo.find({
+        where: { currency: { id: currencyId } },
+        order: { createdAt: 'DESC' },
+        take: limit,
+        relations: ['currency'],
+      });
+
+      return {
+        message: 'Historial de tasas obtenido correctamente',
+        data: result,
+      };
+    } catch (error) {
+      return {
+        message: 'Error al obtener el historial',
+        data: null,
+      };
+    }
+  }
+}

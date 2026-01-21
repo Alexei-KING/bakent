@@ -14,7 +14,6 @@ import type { UserActiveInterface } from 'src/common/interfaces/user-active.inte
 import { Auth } from 'src/modules/auth/decorators/auth.decorator';
 import { Role } from 'src/common/enums/role.enum';
 
-
 @Auth(Role.SUPERVISOR)
 @Controller('sales')
 export class SalesController {
@@ -41,6 +40,6 @@ export class SalesController {
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.salesService.findOne(id);
+    return this.salesService.findOneBy(id);
   }
 }

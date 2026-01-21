@@ -5,9 +5,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { SalesModule } from './modules/sales/sales.module';
-import { QuotesModule } from './modules/quotes/quotes.module';
+
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { CategorysModule } from './modules/categorys/categorys.module';
+import { CurrencyModule } from './modules/currency/currency.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CategorysModule } from './modules/categorys/categorys.module';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '123456',
+      password: 'admin',
       database: 'papeleria',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -26,9 +27,9 @@ import { CategorysModule } from './modules/categorys/categorys.module';
     ProductsModule,
     ClientsModule,
     SalesModule,
-    QuotesModule,
     InventoryModule,
     CategorysModule,
+    CurrencyModule,
   ],
 
   providers: [],
