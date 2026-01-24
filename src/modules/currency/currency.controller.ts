@@ -27,9 +27,13 @@ export class ExchangeRateController {
   ) {
     return this.rateService.create(createDto, user);
   }
-  @Get('currency')
+  @Get('currency/latest')
   getAllLatestRates() {
     return this.rateService.getAllLatestRates();
+  }
+  @Get('currency')
+  getAllCurrencies() {
+    return this.rateService.getAllCurrencies();
   }
 
   @Get('latest/:code')

@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExchangeRate } from './entities/ExchangeRate.entity';
+import { Currency } from './entities/currency.entity';
 import { CreateExchangeRateDto } from './dto/create-currency.dto';
 
 @Injectable()
@@ -14,6 +15,8 @@ export class ExchangeRateService {
   constructor(
     @InjectRepository(ExchangeRate)
     private readonly rateRepo: Repository<ExchangeRate>,
+    @InjectRepository(Currency)
+    private readonly currencyRepo: Repository<Currency>,
   ) {}
 
   async create(
@@ -40,6 +43,21 @@ export class ExchangeRateService {
       };
     }
   }
+
+  async getAllCurrencies() {
+    try {
+      const currencies = await this.currencyRepo.find();
+      return {
+        message: 'Monedas listadas correctamente',
+        data: currencies,
+      };
+    } catch {
+      return {
+        message: 'Error al listar las monedas',
+      };
+    }
+  }
+
   async getAllLatestRates(): Promise<{
     message: string;
     data: ExchangeRate[];
