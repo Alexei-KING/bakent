@@ -9,10 +9,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-
 import { LoginDto } from './dto/login-auth.dto';
-import { Role } from '../../common/enums/role.enum';
-import { Auth } from './decorators/auth.decorator';
 import { ActiveUser } from 'src/common/decorators/active-user.decorator';
 import type { UserActiveInterface } from '../../common/interfaces/user-active.interface';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';

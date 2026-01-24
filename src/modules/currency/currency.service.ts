@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExchangeRate } from './entities/ExchangeRate.entity';
@@ -6,6 +10,7 @@ import { CreateExchangeRateDto } from './dto/create-currency.dto';
 
 @Injectable()
 export class ExchangeRateService {
+  private readonly logger = new Logger(ExchangeRateService.name);
   constructor(
     @InjectRepository(ExchangeRate)
     private readonly rateRepo: Repository<ExchangeRate>,
@@ -16,7 +21,6 @@ export class ExchangeRateService {
     user: { sub: number; cedula: string; role: string },
   ) {
     try {
-      // Creamos la instancia vinculando al usuario por su 'sub' (ID)
       const newRate = this.rateRepo.create({
         rateValue: createDto.rateValue,
         currency: { id: createDto.currencyId },
@@ -36,7 +40,41 @@ export class ExchangeRateService {
       };
     }
   }
+  async getAllLatestRates(): Promise<{
+    message: string;
+    data: ExchangeRate[];
+  }> {
+    try {
+      const latestRates = await this.rateRepo
+        .createQueryBuilder('rate')
+        .innerJoinAndSelect('rate.currency', 'currency')
+        .where((qb) => {
+          const subQuery = qb
+            .subQuery()
+            .select('MAX(innerRate.createdAt)')
+            .from(ExchangeRate, 'innerRate')
+            .where('innerRate.currencyId = rate.currencyId')
+            .getQuery();
+          return 'rate.createdAt = ' + subQuery;
+        })
+        .orderBy('rate.createdAt', 'DESC')
+        .getMany();
 
+      return {
+        message: 'Últimas tasas de todas las monedas obtenidas correctamente',
+        data: latestRates,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error en getAllLatestRates: ${error.message}`,
+        error.stack,
+      );
+
+      throw new InternalServerErrorException(
+        'Error al procesar la solicitud de tasas actuales',
+      );
+    }
+  }
   async getLatestRate(currencyCode: string) {
     const result = await this.rateRepo.findOne({
       where: { currency: { code: currencyCode.toUpperCase() } },
@@ -57,15 +95,16 @@ export class ExchangeRateService {
     };
   }
 
-  async getHistory(currencyId: number, limit: number = 30) {
+  async getHistory(currencyId?: number, limit: number = 30) {
     try {
+      const where = currencyId ? { currency: { id: currencyId } } : {};
+
       const result = await this.rateRepo.find({
-        where: { currency: { id: currencyId } },
+        where,
         order: { createdAt: 'DESC' },
         take: limit,
         relations: ['currency'],
       });
-
       return {
         message: 'Historial de tasas obtenido correctamente',
         data: result,

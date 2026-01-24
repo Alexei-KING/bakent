@@ -10,10 +10,12 @@ import { ExchangeRateService } from './currency.service';
 import { CreateExchangeRateDto } from './dto/create-currency.dto';
 import { ActiveUser } from 'src/common/decorators/active-user.decorator';
 import type { UserActiveInterface } from 'src/common/interfaces/user-active.interface';
-import { Auth } from 'src/modules/auth/decorators/auth.decorator';
-import { Role } from 'src/common/enums/role.enum';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
-@Auth(Role.SUPERVISOR)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('exchange-rates')
 export class ExchangeRateController {
   constructor(private readonly rateService: ExchangeRateService) {}
@@ -24,6 +26,10 @@ export class ExchangeRateController {
     @ActiveUser() user: UserActiveInterface,
   ) {
     return this.rateService.create(createDto, user);
+  }
+  @Get('tasa/cambio')
+  getAllLatestRates() {
+    return this.rateService.getAllLatestRates();
   }
 
   @Get('latest/:code')

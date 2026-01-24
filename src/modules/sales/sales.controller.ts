@@ -9,7 +9,6 @@ import {
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { ActiveUser } from 'src/common/decorators/active-user.decorator';
-// --- CORRECCIÓN 1: Agregamos "import type" ---
 import type { UserActiveInterface } from 'src/common/interfaces/user-active.interface';
 import { Auth } from 'src/modules/auth/decorators/auth.decorator';
 import { Role } from 'src/common/enums/role.enum';
