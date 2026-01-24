@@ -52,8 +52,8 @@ export class AuthController {
     return this.authService.logout(user.sub);
   }
   @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get('profile')
-  @Auth(Role.ADMINISTRADOR)
   profile(@ActiveUser() user: UserActiveInterface) {
     return this.authService.profile(user);
   }

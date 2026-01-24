@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,21 +26,39 @@ export class UsersService {
   async findOneWithRefreshToken(id: number) {
     return await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'cedula', 'refreshTokenHash'], // Necesitamos el hash oculto
+      select: ['id', 'cedula', 'refreshTokenHash'],
       relations: ['role'],
     });
   }
 
-  create(createUserDto: CreateUserDto) {
-    const user = this.userRepository.save({
-      ...createUserDto,
-      role: {
-        id: createUserDto.role,
-      },
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.findOneByCedula(createUserDto.cedula);
+
+    if (existingUser) {
+      throw new ConflictException(
+        `El usuario con cédula ${createUserDto.cedula} ya existe`,
+      );
+    }
+
+    const role = await this.rolesRepository.findOneBy({
+      id: createUserDto.role,
     });
+    if (!role) {
+      throw new NotFoundException(
+        `El rol con ID ${createUserDto.role} no existe`,
+      );
+    }
+
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      role: role,
+    });
+
+    const savedUser = await this.userRepository.save(newUser);
+
     return {
       message: 'Usuario creado correctamente',
-      data: user,
+      data: savedUser,
     };
   }
 
