@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -5,6 +6,8 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  IsPositive,
+  Min,
 } from 'class-validator';
 
 export class CreateClientDto {

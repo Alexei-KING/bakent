@@ -5,16 +5,16 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   ParseIntPipe,
 } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
+import { ProcessPaymentDto } from './dto/create-Payment.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { Auth } from 'src/modules/auth/decorators/auth.decorator';
 import { Role } from 'src/common/enums/role.enum';
 
-@Auth(Role.SUPERVISOR) 
+@Auth(Role.SUPERVISOR)
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
@@ -42,13 +42,12 @@ export class ClientsController {
     return this.clientsService.update(id, updateClientDto);
   }
 
-  // --- AQUÍ ESTABA EL ERROR ---
   @Patch(':id/payment')
-  processPayment( // Nombre corregido
+  async processPayment(
     @Param('id', ParseIntPipe) id: number,
-    @Body('abono') abono: number,
+    @Body() dto: ProcessPaymentDto, // Usamos el DTO aquí
   ) {
-    // Antes decía: .processPayent(id, abono)
-    return this.clientsService.processPayment(id, abono); 
+    // Pasamos el ID y el valor ya validado al servicio
+    return await this.clientsService.processPayment(id, dto.abono);
   }
 }

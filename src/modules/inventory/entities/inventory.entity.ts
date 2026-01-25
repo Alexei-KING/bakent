@@ -24,7 +24,9 @@ export class InventoryEntry {
   @ManyToOne(() => User)
   user: User;
 
-  @OneToMany(() => StockMovement, (movement) => movement.inventoryEntry)
+  @OneToMany(() => StockMovement, (movement) => movement.inventoryEntry, {
+    cascade: true,
+  })
   movements: StockMovement[];
 
   @CreateDateColumn()
