@@ -2,6 +2,7 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -36,11 +37,8 @@ export class ExchangeRateService {
         message: 'Tasa de cambio registrada correctamente',
         data: result,
       };
-    } catch (error) {
-      return {
-        message: 'Error al registrar la tasa de cambio',
-        data: error.message,
-      };
+    } catch {
+      throw new BadRequestException('Error al registrar la tasa de cambio');
     }
   }
 
@@ -52,9 +50,7 @@ export class ExchangeRateService {
         data: currencies,
       };
     } catch {
-      return {
-        message: 'Error al listar las monedas',
-      };
+      throw new BadRequestException('Error al listar las monedas');
     }
   }
 
@@ -82,12 +78,7 @@ export class ExchangeRateService {
         message: 'Últimas tasas de todas las monedas obtenidas correctamente',
         data: latestRates,
       };
-    } catch (error) {
-      this.logger.error(
-        `Error en getAllLatestRates: ${error.message}`,
-        error.stack,
-      );
-
+    } catch {
       throw new InternalServerErrorException(
         'Error al procesar la solicitud de tasas actuales',
       );
@@ -121,17 +112,14 @@ export class ExchangeRateService {
         where,
         order: { createdAt: 'DESC' },
         take: limit,
-        relations: ['currency'],
+        relations: ['currency', 'user'],
       });
       return {
         message: 'Historial de tasas obtenido correctamente',
         data: result,
       };
-    } catch (error) {
-      return {
-        message: 'Error al obtener el historial',
-        data: null,
-      };
+    } catch {
+      throw new BadRequestException('Error al obtener el historial de tasas');
     }
   }
 }

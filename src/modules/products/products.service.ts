@@ -2,6 +2,7 @@ import {
   Injectable,
   BadGatewayException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -71,7 +72,7 @@ export class ProductsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadGatewayException(`Error update product with id ${id}`);
+      throw new BadRequestException(`Error update product with id ${id}`);
     }
   }
 
