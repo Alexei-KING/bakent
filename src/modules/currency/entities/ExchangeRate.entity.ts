@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Currency } from './currency.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('exchange_rates')
+@Index(['currency', 'createdAt'])
 export class ExchangeRate {
   @PrimaryGeneratedColumn()
   id: number;

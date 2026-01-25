@@ -17,7 +17,14 @@ import { Currency } from 'src/modules/currency/entities/currency.entity';
 export class Sale {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column('decimal', { precision: 12, scale: 2 })
+  @Column('decimal', {
+    precision: 15,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   total: number;
 
   @ManyToOne(() => PaymentMethod, (pm) => pm.sales, { eager: true })
